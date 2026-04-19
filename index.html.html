@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Base Naval Ushuaia 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--border:#2a2f38;
+  --accent:#c8a84b;--accent2:#e8c96a;--text:#e8e9ea;--muted:#6b7280;
+  --green:#1a4731;--green-text:#4ade80;--green-border:#16a34a;
+  --red:#4a1a1a;--red-text:#f87171;--red-border:#dc2626;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-body:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+.header{background:var(--bg2);border-bottom:2px solid var(--accent);padding:0.9rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.header-title{font-family:var(--font-display);font-size:1.8rem;letter-spacing:0.1em;color:var(--accent);}
+.header-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.15em;margin-top:2px;}
+.header-date{font-family:var(--font-mono);font-size:0.75rem;color:var(--accent2);text-align:right;}
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:2rem;}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--accent);padding:2.5rem;width:420px;max-width:100%;}
+.login-card h2{font-family:var(--font-display);font-size:1.6rem;letter-spacing:0.08em;color:var(--accent);margin-bottom:0.3rem;}
+.login-card p{font-size:0.72rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:1.5rem;letter-spacing:0.08em;}
+.login-section-label{font-family:var(--font-mono);font-size:0.6rem;color:var(--accent);letter-spacing:0.15em;margin-bottom:0.6rem;margin-top:1rem;}
+.login-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+.user-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:0.8rem 1rem;text-align:left;cursor:pointer;transition:all .2s;font-family:var(--font-body);width:100%;}
+.user-btn:hover,.user-btn.sel{border-color:var(--accent);background:rgba(200,168,75,0.07);}
+.user-btn .role{font-size:0.6rem;font-family:var(--font-mono);color:var(--accent);letter-spacing:0.1em;margin-bottom:3px;}
+.user-btn .name{font-size:0.9rem;font-weight:500;}
+.login-divider{border:none;border-top:1px solid var(--border);margin:1.2rem 0;}
+.pwd-row{display:flex;gap:0.5rem;margin-top:0.5rem;}
+.pwd-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.8rem;padding:0.5rem 0.75rem;flex:1;outline:none;}
+.pwd-input:focus{border-color:var(--accent);}
+.pwd-submit{font-family:var(--font-mono);font-size:0.7rem;padding:0.5rem 1rem;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;}
+.pwd-submit:hover{background:var(--accent);color:var(--bg);}
+.pwd-error{font-family:var(--font-mono);font-size:0.7rem;color:var(--red-text);margin-top:0.4rem;display:none;}
+#app{display:none;}
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;flex-wrap:wrap;}
+.nav-btn{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.07em;padding:0.9rem 1.1rem;background:transparent;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-spacer{flex:1;}
+.nav-user{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);padding:0.9rem 0.5rem;}
+.logout-btn{font-family:var(--font-mono);font-size:0.68rem;background:transparent;border:1px solid var(--border);color:var(--muted);padding:0.35rem 0.8rem;cursor:pointer;margin:0.5rem;}
+.logout-btn:hover{border-color:var(--red-border);color:var(--red-text);}
+.content{padding:1.5rem 2rem;}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1.5rem;}
+.stat{background:var(--bg2);padding:1rem 1.2rem;}
+.stat-val{font-family:var(--font-display);font-size:2rem;letter-spacing:0.05em;line-height:1;}
+.stat-lbl{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.12em;color:var(--muted);margin-top:3px;}
+.stat-val.green{color:var(--green-text);}
+.stat-val.red{color:var(--red-text);}
+.stat-val.gold{color:var(--accent);}
+.division-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+.division-title{font-family:var(--font-display);font-size:1.6rem;letter-spacing:0.08em;color:var(--accent);}
+.division-badge{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.12em;background:rgba(200,168,75,0.1);border:1px solid var(--accent);color:var(--accent);padding:3px 9px;}
+.table-wrap{background:var(--bg2);border:1px solid var(--border);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:480px;}
+thead{background:var(--bg3);}
+th{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.12em;color:var(--muted);padding:0.7rem 0.9rem;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:0.6rem 0.9rem;font-size:0.85rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.jerarquia{font-family:var(--font-mono);font-size:0.78rem;color:var(--accent2);font-weight:500;}
+.nombre-cell{font-weight:500;}
+.estado-select{font-family:var(--font-mono);font-size:0.72rem;padding:4px 7px;border:1px solid var(--border);cursor:pointer;width:100%;transition:all .2s;background:var(--bg3);color:var(--text);}
+.estado-select.presente{background:var(--green);border-color:var(--green-border);color:var(--green-text);}
+.estado-select.ausente{background:var(--red);border-color:var(--red-border);color:var(--red-text);}
+.btn{font-family:var(--font-mono);font-size:0.72rem;letter-spacing:0.06em;padding:0.55rem 1.2rem;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .2s;}
+.btn:hover{background:var(--accent);color:var(--bg);}
+.btn-sm{padding:0.3rem 0.8rem;font-size:0.65rem;}
+.btn-red{border-color:var(--red-border);color:var(--red-text);}
+.btn-red:hover{background:var(--red-border);color:#fff;}
+.btn-muted{border-color:var(--border);color:var(--muted);}
+.btn-muted:hover{border-color:var(--text);color:var(--text);}
+.btn-row{display:flex;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);padding:1.5rem;width:520px;max-width:100%;max-height:88vh;overflow-y:auto;}
+.modal h3{font-family:var(--font-display);font-size:1.2rem;letter-spacing:0.08em;color:var(--accent);margin-bottom:1rem;}
+.modal-row{display:flex;gap:0.5rem;margin-bottom:0.6rem;align-items:center;flex-wrap:wrap;}
+.modal-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.78rem;padding:0.45rem 0.7rem;flex:1;outline:none;min-width:80px;}
+.modal-input:focus{border-color:var(--accent);}
+.modal-btn-row{display:flex;gap:0.5rem;margin-top:1rem;justify-content:flex-end;}
+.person-edit-row{display:flex;gap:0.4rem;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--border);}
+.person-edit-row:last-child{border-bottom:none;}
+.person-edit-row input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:0.75rem;padding:3px 6px;outline:none;}
+.person-edit-row input:focus{border-color:var(--accent);}
+.del-row-btn{background:transparent;border:1px solid var(--red-border);color:var(--red-text);font-size:0.65rem;padding:2px 7px;cursor:pointer;font-family:var(--font-mono);flex-shrink:0;}
+.del-row-btn:hover{background:var(--red-border);color:#fff;}
+.gen-section{margin-bottom:2rem;}
+.gen-title{font-family:var(--font-display);font-size:1rem;letter-spacing:0.1em;color:var(--accent);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);}
+.div-summary{background:var(--bg2);border:1px solid var(--border);padding:1rem 1.2rem;margin-bottom:0.4rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;gap:0.8rem;}
+.div-name{font-family:var(--font-display);font-size:0.95rem;letter-spacing:0.06em;}
+.div-stat{text-align:center;}
+.div-stat .val{font-family:var(--font-mono);font-size:1rem;font-weight:500;}
+.div-stat .lbl{font-family:var(--font-mono);font-size:0.58rem;letter-spacing:0.1em;color:var(--muted);}
+.ausentes-box{background:var(--bg2);border:1px solid var(--border);margin-bottom:0.6rem;}
+.ausentes-group-title{font-family:var(--font-mono);font-size:0.62rem;letter-spacing:0.12em;color:var(--accent2);padding:5px 10px;background:rgba(200,168,75,0.06);border-bottom:1px solid var(--border);border-left:2px solid var(--accent);}
+.ausente-item{font-size:0.85rem;padding:5px 10px;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:center;}
+.ausente-item:last-child{border-bottom:none;}
+.ausente-jer{font-family:var(--font-mono);font-size:0.75rem;color:var(--accent2);min-width:55px;}
+.ausente-div-lbl{font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);margin-left:auto;}
+.informe-item{background:var(--bg2);border:1px solid var(--border);margin-bottom:0.5rem;padding:1rem 1.2rem;}
+.informe-fecha{font-family:var(--font-display);font-size:0.95rem;letter-spacing:0.06em;color:var(--accent);margin-bottom:0.4rem;}
+.informe-stats{display:flex;gap:1.5rem;font-family:var(--font-mono);font-size:0.75rem;flex-wrap:wrap;}
+@media print{
+  body{background:#fff!important;color:#000!important;}
+  .nav,.btn-row,.logout-btn,.no-print{display:none!important;}
+  .header{background:#fff!important;border-bottom:2px solid #8B6914;}
+  .header-title{color:#8B6914!important;}
+  .header-sub,.header-date{color:#555!important;}
+  .content{padding:0.5rem!important;}
+  .stats-bar{background:#bbb!important;}
+  .stat{background:#f4f4f4!important;}
+  .stat-val.green{color:#15803d!important;}
+  .stat-val.red{color:#dc2626!important;}
+  .stat-val.gold{color:#92400e!important;}
+  .gen-title,.division-title{color:#333!important;}
+  .div-summary,.ausentes-box{background:#f9f9f9!important;border:1px solid #ccc!important;}
+  .ausentes-group-title{color:#92400e!important;background:#fef3c7!important;border-left:2px solid #92400e!important;}
+  .ausente-jer{color:#92400e!important;}
+  .ausente-div-lbl{color:#666!important;}
+  .div-stat .lbl,.stat-lbl{color:#666!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">BASE NAVAL USHUAIA 2026</div>
+    <div class="header-sub">SISTEMA DE CONTROL DE PRESENTISMO — DIVISIÓN TANGO</div>
+  </div>
+  <div class="header-date" id="header-date"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>ACCESO AL SISTEMA</h2>
+    <p>SELECCIONE SU SECCIÓN E INGRESE SU CONTRASEÑA</p>
+
+    <div class="login-section-label">▎ ENCARGADO GENERAL</div>
+    <button class="user-btn" id="btn-sec-general" onclick="selectSection('general',this)" style="width:100%;margin-bottom:0.5rem;">
+      <div class="role">ENCARGADO DIV TANGO</div>
+      <div class="name">Encargado General</div>
+    </button>
+
+    <hr class="login-divider"/>
+
+    <div class="login-section-label">▎ ENCARGADOS DE DIVISIÓN</div>
+    <div class="login-btn-grid">
+      <button class="user-btn" onclick="selectSection('Electricidad',this)"><div class="role">DIVISIÓN</div><div class="name">Electricidad</div></button>
+      <button class="user-btn" onclick="selectSection('Electrónica',this)"><div class="role">DIVISIÓN</div><div class="name">Electrónica</div></button>
+      <button class="user-btn" onclick="selectSection('Armas',this)"><div class="role">DIVISIÓN</div><div class="name">Armas</div></button>
+      <button class="user-btn" onclick="selectSection('Mecánica',this)"><div class="role">DIVISIÓN</div><div class="name">Mecánica</div></button>
+      <button class="user-btn" onclick="selectSection('Automotores',this)"><div class="role">DIVISIÓN</div><div class="name">Automotores</div></button>
+      <button class="user-btn" onclick="selectSection('Lucha Contra Incendio',this)"><div class="role">DIVISIÓN</div><div class="name">Luc. Contra Incendio</div></button>
+      <button class="user-btn" style="grid-column:span 2;" onclick="selectSection('Auxiliares',this)"><div class="role">DIVISIÓN</div><div class="name">Auxiliares</div></button>
+    </div>
+
+    <div id="pwd-area" style="margin-top:1rem;display:none;">
+      <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);margin-bottom:0.4rem;letter-spacing:0.08em;" id="pwd-label"></div>
+      <div class="pwd-row">
+        <input class="pwd-input" type="password" id="pwd-field" placeholder="Contraseña..." onkeydown="if(event.key==='Enter')submitPwd()"/>
+        <button class="pwd-submit" onclick="submitPwd()">INGRESAR</button>
+      </div>
+      <div class="pwd-error" id="pwd-error">Contraseña incorrecta.</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="nav">
+    <button class="nav-btn active" id="nav-main" onclick="showSection('main')">PRESENTISMO</button>
+    <button class="nav-btn" id="nav-informe" onclick="showSection('informe')" style="display:none;">INFORME HISTÓRICO</button>
+    <div class="nav-spacer"></div>
+    <span class="nav-user" id="nav-user"></span>
+    <button class="logout-btn" onclick="logout()">SALIR</button>
+  </div>
+  <div class="content">
+
+    <!-- DIVISIÓN -->
+    <div id="section-main">
+      <div class="division-header">
+        <div class="division-title" id="div-title"></div>
+        <div class="division-badge">ENCARGADO DE SECCIÓN</div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat"><div class="stat-val gold" id="s-fe">0</div><div class="stat-lbl">FUERZA EFECTIVA</div></div>
+        <div class="stat"><div class="stat-val green" id="s-pr">0</div><div class="stat-lbl">PRESENTES</div></div>
+        <div class="stat"><div class="stat-val red" id="s-au">0</div><div class="stat-lbl">AUSENTES</div></div>
+      </div>
+      <div class="btn-row no-print">
+        <button class="btn btn-sm" onclick="abrirModalPersonal()">✎ EDITAR PERSONAL</button>
+        <button class="btn btn-sm btn-muted" onclick="abrirModalEstados()">+ AGREGAR ESTADO</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>JERARQUÍA</th><th>APELLIDO</th><th>NOMBRE</th><th>ESTADO</th></tr></thead>
+          <tbody id="personal-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GENERAL -->
+    <div id="section-general" style="display:none;">
+      <div class="division-header">
+        <div class="division-title">PARTE GENERAL — DIVISIÓN TANGO</div>
+      </div>
+      <div class="btn-row no-print">
+        <button class="btn" onclick="window.print()">▼ IMPRIMIR / PDF</button>
+        <button class="btn btn-muted" onclick="showSection('informe')">≡ INFORME HISTÓRICO</button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:1rem;" id="fecha-general"></div>
+      <div class="stats-bar" style="margin-bottom:1.5rem;">
+        <div class="stat"><div class="stat-val gold" id="g-fe">0</div><div class="stat-lbl">FUERZA EFECTIVA TOTAL</div></div>
+        <div class="stat"><div class="stat-val green" id="g-pr">0</div><div class="stat-lbl">PRESENTES</div></div>
+        <div class="stat"><div class="stat-val red" id="g-au">0</div><div class="stat-lbl">AUSENTES</div></div>
+      </div>
+      <div class="gen-section">
+        <div class="gen-title">ENCARGADOS DIVISIÓN TANGO</div>
+        <div class="table-wrap" style="margin-bottom:0.5rem;">
+          <table><thead><tr><th>JERARQUÍA</th><th>APELLIDO</th><th>NOMBRE</th><th>ESTADO</th></tr></thead>
+          <tbody id="enc-tbody"></tbody></table>
+        </div>
+        <div class="btn-row no-print" style="margin-top:0.6rem;margin-bottom:0;">
+          <button class="btn btn-sm btn-muted" onclick="abrirModalEncargados()">✎ EDITAR ENCARGADOS</button>
+        </div>
+      </div>
+      <div class="gen-section">
+        <div class="gen-title">RESUMEN POR DIVISIÓN</div>
+        <div id="div-summaries"></div>
+      </div>
+      <div class="gen-section" id="ausentes-section" style="display:none;">
+        <div class="gen-title">DETALLE DE AUSENTES POR CAUSA</div>
+        <div id="ausentes-detalle"></div>
+      </div>
+    </div>
+
+    <!-- INFORME -->
+    <div id="section-informe" style="display:none;">
+      <div class="division-header"><div class="division-title">INFORME HISTÓRICO</div></div>
+      <div class="btn-row no-print">
+        <button class="btn" onclick="showSection('general')">← VOLVER</button>
+        <button class="btn btn-red" onclick="limpiarHistorial()">✕ LIMPIAR HISTORIAL</button>
+      </div>
+      <div id="informe-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ENCARGADOS -->
+<div class="modal-overlay" id="modal-encargados" style="display:none;">
+  <div class="modal">
+    <h3>EDITAR ENCARGADOS</h3>
+    <div id="modal-encargados-list"></div>
+    <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--border);">
+      <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">AGREGAR ENCARGADO</div>
+      <div class="modal-row">
+        <input class="modal-input" id="new-enc-jer" placeholder="Jerarquía" style="max-width:100px;"/>
+        <input class="modal-input" id="new-enc-ap" placeholder="Apellido"/>
+        <input class="modal-input" id="new-enc-nom" placeholder="Nombre"/>
+        <button class="btn btn-sm" onclick="agregarEncargado()">+</button>
+      </div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn" onclick="guardarEncargados()">GUARDAR</button>
+      <button class="btn btn-muted" onclick="cerrarModal('modal-encargados')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERSONAL -->
+<div class="modal-overlay" id="modal-personal" style="display:none;">
+  <div class="modal">
+    <h3>EDITAR PERSONAL — <span id="modal-div-name"></span></h3>
+    <div id="modal-personal-list"></div>
+    <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--border);">
+      <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">AGREGAR INTEGRANTE</div>
+      <div class="modal-row">
+        <input class="modal-input" id="new-jer" placeholder="Jerarquía" style="max-width:100px;"/>
+        <input class="modal-input" id="new-ap" placeholder="Apellido"/>
+        <input class="modal-input" id="new-nom" placeholder="Nombre"/>
+        <button class="btn btn-sm" onclick="agregarPersona()">+</button>
+      </div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn" onclick="guardarPersonal()">GUARDAR</button>
+      <button class="btn btn-muted" onclick="cerrarModal('modal-personal')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ESTADOS -->
+<div class="modal-overlay" id="modal-estados" style="display:none;">
+  <div class="modal">
+    <h3>GESTIONAR ESTADOS</h3>
+    <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);margin-bottom:0.7rem;letter-spacing:0.08em;">Estados disponibles en el sistema:</div>
+    <div id="modal-estados-list"></div>
+    <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid var(--border);">
+      <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem;">AGREGAR NUEVO ESTADO</div>
+      <div class="modal-row">
+        <input class="modal-input" id="new-estado-input" placeholder="Nombre del estado..."/>
+        <button class="btn btn-sm" onclick="agregarEstado()">+</button>
+      </div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-muted" onclick="cerrarModal('modal-estados')">CERRAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASSWORDS={
+  'general':'tango2026',
+  'Electricidad':'elec2026',
+  'Electrónica':'elect2026',
+  'Armas':'armas2026',
+  'Mecánica':'mec2026',
+  'Automotores':'auto2026',
+  'Lucha Contra Incendio':'lci2026',
+  'Auxiliares':'aux2026'
+};
+
+const PERSONAL_BASE={
+  'Electricidad':[{jer:'SI',ap:'Enrique',nom:''},{jer:'SS',ap:'Torres',nom:''},{jer:'SS',ap:'Bordón',nom:''},{jer:'SS',ap:'Acosta',nom:''},{jer:'SS',ap:'Amaro',nom:''},{jer:'CP',ap:'Gallardo',nom:''},{jer:'CP',ap:'Gordillo',nom:''},{jer:'CI',ap:'Huanco',nom:''},{jer:'CI',ap:'Quispe',nom:''},{jer:'CS',ap:'Alejandro',nom:''}],
+  'Electrónica':[{jer:'SP',ap:'Guerrero',nom:''},{jer:'CP',ap:'Valdebenito',nom:''}],
+  'Auxiliares':[{jer:'SP',ap:'Calapeña',nom:''},{jer:'SS',ap:'Stark',nom:''},{jer:'SS',ap:'Contrera',nom:''},{jer:'CP',ap:'Figueroa',nom:''},{jer:'CI',ap:'Casquet',nom:''},{jer:'CI',ap:'Bazan',nom:''},{jer:'CI',ap:'Suruguay',nom:''},{jer:'MS',ap:'Lazarte',nom:''}],
+  'Armas':[{jer:'SP',ap:'Avendaño',nom:''},{jer:'SS',ap:'Roa',nom:''},{jer:'CP',ap:'Sobrecasas',nom:''},{jer:'CP',ap:'Fernandez',nom:''},{jer:'CI',ap:'Leonetti',nom:''}],
+  'Lucha Contra Incendio':[{jer:'SI',ap:'Bustos',nom:''},{jer:'CI',ap:'Romero',nom:''}],
+  'Automotores':[{jer:'SP',ap:'Santa María',nom:''},{jer:'SI',ap:'Castro',nom:''},{jer:'CP',ap:'Vera',nom:''},{jer:'CI',ap:'Li Destri',nom:''},{jer:'CS',ap:'Aguirre',nom:''},{jer:'CS',ap:'Giménez',nom:''},{jer:'CS',ap:'Martinez',nom:''}],
+  'Mecánica':[{jer:'SPMQ',ap:'Stalldecker',nom:''},{jer:'SS',ap:'Pistan',nom:''},{jer:'SS',ap:'Gutiérrez',nom:''},{jer:'SS',ap:'Quintero',nom:''},{jer:'SS',ap:'Casimiro',nom:''},{jer:'CI',ap:'Toconas',nom:''},{jer:'CI',ap:'Alvarez',nom:''},{jer:'MS',ap:'Mathier',nom:''}],
+};
+const DIVISIONES=Object.keys(PERSONAL_BASE);
+const ESTADOS_BASE=['presente','sin causa','autorizado','turno médico','sin servicio','puesto de trabajo','guardia entrante','guardia saliente'];
+const PERSONAL_ENCARGADOS_BASE=[
+  {jer:'',ap:'Encargado 1',nom:''},
+  {jer:'',ap:'Encargado 2',nom:''},
+];
+function getPersonalEncargados(){return lsGet('bnu_personal_encargados')||JSON.parse(JSON.stringify(PERSONAL_ENCARGADOS_BASE));}
+function savePersonalEncargados(d){lsSet('bnu_personal_encargados',d);}
+function getEstadosEncargados(){const s=lsGet('bnu_est_encargados_'+HOY_KEY);if(s)return s;const d={};getPersonalEncargados().forEach((_,i)=>d[i]='presente');return d;}
+function saveEstadosEncargados(e){lsSet('bnu_est_encargados_'+HOY_KEY,e);}
+
+let currentUser=null,currentRole=null,currentDiv=null;
+let estados={};
+let selectedSec=null;
+let modalPersonalDiv=null,modalPersonalTemp=[];
+
+const HOY=new Date().toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+const HOY_KEY=new Date().toISOString().split('T')[0];
+
+function lsGet(k){try{const d=localStorage.getItem(k);return d?JSON.parse(d):null;}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+function getPersonal(div){const s=lsGet('bnu_personal_'+div);return s||JSON.parse(JSON.stringify(PERSONAL_BASE[div]));}
+function savePersonal(div,d){lsSet('bnu_personal_'+div,d);}
+function getEstados(div){const s=lsGet('bnu_est_'+div+'_'+HOY_KEY);if(s)return s;const d={};getPersonal(div).forEach((_,i)=>d[i]='presente');return d;}
+function saveEstados(div,e){lsSet('bnu_est_'+div+'_'+HOY_KEY,e);}
+function getEstadosList(){return lsGet('bnu_estados_opciones')||[...ESTADOS_BASE];}
+function saveEstadosList(l){lsSet('bnu_estados_opciones',l);}
+
+// LOGIN
+function selectSection(sec,btn){
+  selectedSec=sec;
+  document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const area=document.getElementById('pwd-area');
+  area.style.display='block';
+  document.getElementById('pwd-label').textContent='CONTRASEÑA — '+(sec==='general'?'ENCARGADO GENERAL':sec.toUpperCase());
+  document.getElementById('pwd-field').value='';
+  document.getElementById('pwd-error').style.display='none';
+  setTimeout(()=>document.getElementById('pwd-field').focus(),50);
+}
+
+function submitPwd(){
+  const val=document.getElementById('pwd-field').value;
+  if(val===PASSWORDS[selectedSec]){
+    doLogin(selectedSec);
+  }else{
+    document.getElementById('pwd-error').style.display='block';
+    document.getElementById('pwd-field').value='';
+    document.getElementById('pwd-field').focus();
+  }
+}
+
+function doLogin(sec){
+  currentUser=sec;
+  currentRole=sec==='general'?'general':'division';
+  currentDiv=sec==='general'?null:sec;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.querySelectorAll('.user-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('pwd-area').style.display='none';
+
+  if(currentRole==='general'){
+    document.getElementById('nav-main').textContent='PARTE GENERAL';
+    document.getElementById('nav-informe').style.display='inline-block';
+    document.getElementById('nav-user').textContent='ENCARGADO DIV TANGO';
+    document.getElementById('nav-main').onclick=()=>showSection('general');
+    showSection('general');
+  }else{
+    document.getElementById('nav-main').textContent='PRESENTISMO';
+    document.getElementById('nav-informe').style.display='none';
+    document.getElementById('nav-user').textContent='DIV. '+sec.toUpperCase();
+    document.getElementById('nav-main').onclick=()=>showSection('main');
+    estados=getEstados(sec);
+    showSection('main');
+    renderDivision(sec);
+  }
+}
+
+function logout(){
+  currentUser=currentRole=currentDiv=null;selectedSec=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+// DIVISIÓN
+function renderDivision(div){
+  document.getElementById('div-title').textContent='DIVISIÓN '+div.toUpperCase();
+  renderTabla(div);
+  updateStats(div);
+}
+
+function renderTabla(div){
+  const tbody=document.getElementById('personal-tbody');
+  tbody.innerHTML='';
+  const personal=getPersonal(div);
+  const opciones=getEstadosList();
+  personal.forEach((p,i)=>{
+    const est=estados[i]||'presente';
+    const isP=est==='presente';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="jerarquia">${p.jer}</td>
+      <td class="nombre-cell">${p.ap}</td>
+      <td>${p.nom||''}</td>
+      <td><select class="estado-select ${isP?'presente':'ausente'}" onchange="cambiarEstado('${div}',${i},this)">
+        ${opciones.map(o=>`<option value="${o}" ${o===est?'selected':''}>${o.toUpperCase()}</option>`).join('')}
+      </select></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function cambiarEstado(div,idx,sel){
+  estados[idx]=sel.value;
+  sel.className='estado-select '+(sel.value==='presente'?'presente':'ausente');
+  saveEstados(div,estados);
+  updateStats(div);
+}
+
+function updateStats(div){
+  const fe=getPersonal(div).length;
+  const pr=Object.values(estados).filter(e=>e==='presente').length;
+  document.getElementById('s-fe').textContent=fe;
+  document.getElementById('s-pr').textContent=pr;
+  document.getElementById('s-au').textContent=fe-pr;
+}
+
+// MODAL PERSONAL
+function abrirModalPersonal(){
+  modalPersonalDiv=currentDiv;
+  modalPersonalTemp=JSON.parse(JSON.stringify(getPersonal(currentDiv)));
+  document.getElementById('modal-div-name').textContent=currentDiv.toUpperCase();
+  renderModalPersonal();
+  document.getElementById('modal-personal').style.display='flex';
+}
+
+function renderModalPersonal(){
+  document.getElementById('modal-personal-list').innerHTML=modalPersonalTemp.map((p,i)=>`
+    <div class="person-edit-row">
+      <input value="${p.jer}" oninput="modalPersonalTemp[${i}].jer=this.value" placeholder="Jer." style="width:75px;"/>
+      <input value="${p.ap}" oninput="modalPersonalTemp[${i}].ap=this.value" placeholder="Apellido" style="flex:1;min-width:80px;"/>
+      <input value="${p.nom||''}" oninput="modalPersonalTemp[${i}].nom=this.value" placeholder="Nombre" style="flex:1;min-width:80px;"/>
+      <button class="del-row-btn" onclick="eliminarPersonaModal(${i})">✕</button>
+    </div>`).join('');
+}
+
+function eliminarPersonaModal(i){modalPersonalTemp.splice(i,1);renderModalPersonal();}
+
+function agregarPersona(){
+  const jer=document.getElementById('new-jer').value.trim();
+  const ap=document.getElementById('new-ap').value.trim();
+  const nom=document.getElementById('new-nom').value.trim();
+  if(!jer||!ap)return;
+  modalPersonalTemp.push({jer,ap,nom});
+  document.getElementById('new-jer').value='';
+  document.getElementById('new-ap').value='';
+  document.getElementById('new-nom').value='';
+  renderModalPersonal();
+}
+
+function guardarPersonal(){
+  savePersonal(modalPersonalDiv,modalPersonalTemp);
+  const newEst={};
+  modalPersonalTemp.forEach((_,i)=>newEst[i]=estados[i]||'presente');
+  estados=newEst;
+  saveEstados(modalPersonalDiv,estados);
+  renderDivision(modalPersonalDiv);
+  cerrarModal('modal-personal');
+}
+
+// MODAL ESTADOS
+function abrirModalEstados(){
+  renderModalEstados();
+  document.getElementById('modal-estados').style.display='flex';
+}
+
+function renderModalEstados(){
+  const lista=getEstadosList();
+  document.getElementById('modal-estados-list').innerHTML=lista.map((e,i)=>`
+    <div class="person-edit-row">
+      <span style="font-family:var(--font-mono);font-size:0.78rem;flex:1;">${e.toUpperCase()}</span>
+      ${i>=ESTADOS_BASE.length
+        ?`<button class="del-row-btn" onclick="eliminarEstado(${i})">✕</button>`
+        :'<span style="font-size:0.6rem;color:var(--muted);font-family:var(--font-mono);">base</span>'}
+    </div>`).join('');
+}
+
+function agregarEstado(){
+  const val=document.getElementById('new-estado-input').value.trim().toLowerCase();
+  if(!val)return;
+  const lista=getEstadosList();
+  if(!lista.includes(val)){lista.push(val);saveEstadosList(lista);}
+  document.getElementById('new-estado-input').value='';
+  renderModalEstados();
+  if(currentDiv)renderTabla(currentDiv);
+}
+
+function eliminarEstado(i){
+  const lista=getEstadosList();
+  lista.splice(i,1);
+  saveEstadosList(lista);
+  renderModalEstados();
+  if(currentDiv)renderTabla(currentDiv);
+}
+
+function cerrarModal(id){document.getElementById(id).style.display='none';}
+
+// GENERAL
+function loadGeneral(){
+  guardarHistorial();
+  document.getElementById('fecha-general').textContent='FECHA: '+HOY;
+
+  const encPersonal=getPersonalEncargados();
+  const encEst=getEstadosEncargados();
+  let totalFE=encPersonal.length;
+  let totalPR=Object.values(encEst).filter(e=>e==='presente').length;
+  let totalAU=totalFE-totalPR;
+  const ausPorEstado={};
+
+  // tabla encargados
+  const opciones=getEstadosList();
+  document.getElementById('enc-tbody').innerHTML=encPersonal.map((p,i)=>{
+    const est=encEst[i]||'presente';
+    const isP=est==='presente';
+    return `<tr>
+      <td class="jerarquia">${p.jer}</td>
+      <td class="nombre-cell">${p.ap}</td>
+      <td>${p.nom||''}</td>
+      <td><select class="estado-select ${isP?'presente':'ausente'}" onchange="cambiarEstadoEncargado(${i},this)">
+        ${opciones.map(o=>`<option value="${o}" ${o===est?'selected':''}>${o.toUpperCase()}</option>`).join('')}
+      </select></td>
+    </tr>`;
+  }).join('');
+
+  // ausentes encargados
+  encPersonal.forEach((p,i)=>{
+    const e=encEst[i]||'presente';
+    if(e!=='presente'){
+      if(!ausPorEstado[e])ausPorEstado[e]=[];
+      ausPorEstado[e].push({jer:p.jer,ap:p.ap,nom:p.nom,div:'ENC. GENERAL'});
+    }
+  });
+
+  let sumHtml='';
+  DIVISIONES.forEach(div=>{
+    const est=getEstados(div);
+    const personal=getPersonal(div);
+    const fe=personal.length;
+    const pr=Object.values(est).filter(e=>e==='presente').length;
+    const au=fe-pr;
+    totalFE+=fe;totalPR+=pr;totalAU+=au;
+    personal.forEach((p,i)=>{
+      const e=est[i]||'presente';
+      if(e!=='presente'){
+        if(!ausPorEstado[e])ausPorEstado[e]=[];
+        ausPorEstado[e].push({jer:p.jer,ap:p.ap,nom:p.nom,div});
+      }
+    });
+    sumHtml+=`<div class="div-summary">
+      <div class="div-name">${div.toUpperCase()}</div>
+      <div class="div-stat"><div class="val gold">${fe}</div><div class="lbl">FUERZA EF.</div></div>
+      <div class="div-stat"><div class="val" style="color:var(--green-text)">${pr}</div><div class="lbl">PRESENTES</div></div>
+      <div class="div-stat"><div class="val" style="color:var(--red-text)">${au}</div><div class="lbl">AUSENTES</div></div>
+    </div>`;
+  });
+
+  document.getElementById('g-fe').textContent=totalFE;
+  document.getElementById('g-pr').textContent=totalPR;
+  document.getElementById('g-au').textContent=totalAU;
+  document.getElementById('div-summaries').innerHTML=sumHtml;
+
+  const keys=Object.keys(ausPorEstado);
+  const ausSec=document.getElementById('ausentes-section');
+  if(keys.length>0){
+    ausSec.style.display='block';
+    document.getElementById('ausentes-detalle').innerHTML=keys.map(estado=>{
+      const lista=ausPorEstado[estado];
+      return `<div class="ausentes-box">
+        <div class="ausentes-group-title">▎ ${estado.toUpperCase()} — ${lista.length} PERSONA${lista.length>1?'S':''}</div>
+        ${lista.map(p=>`<div class="ausente-item">
+          <span class="ausente-jer">${p.jer}</span>
+          <span>${p.ap}${p.nom?' '+p.nom:''}</span>
+          <span class="ausente-div-lbl">${p.div.toUpperCase()}</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+  }else{ausSec.style.display='none';}
+}
+
+function cambiarEstadoEncargado(idx,sel){
+  const est=getEstadosEncargados();
+  est[idx]=sel.value;
+  sel.className='estado-select '+(sel.value==='presente'?'presente':'ausente');
+  saveEstadosEncargados(est);
+  loadGeneral();
+}
+
+// MODAL ENCARGADOS
+let modalEncTemp=[];
+function abrirModalEncargados(){
+  modalEncTemp=JSON.parse(JSON.stringify(getPersonalEncargados()));
+  renderModalEncargados();
+  document.getElementById('modal-encargados').style.display='flex';
+}
+function renderModalEncargados(){
+  document.getElementById('modal-encargados-list').innerHTML=modalEncTemp.map((p,i)=>`
+    <div class="person-edit-row">
+      <input value="${p.jer}" oninput="modalEncTemp[${i}].jer=this.value" placeholder="Jer." style="width:75px;"/>
+      <input value="${p.ap}" oninput="modalEncTemp[${i}].ap=this.value" placeholder="Apellido" style="flex:1;min-width:80px;"/>
+      <input value="${p.nom||''}" oninput="modalEncTemp[${i}].nom=this.value" placeholder="Nombre" style="flex:1;min-width:80px;"/>
+      <button class="del-row-btn" onclick="modalEncTemp.splice(${i},1);renderModalEncargados()">✕</button>
+    </div>`).join('');
+}
+function agregarEncargado(){
+  const jer=document.getElementById('new-enc-jer').value.trim();
+  const ap=document.getElementById('new-enc-ap').value.trim();
+  const nom=document.getElementById('new-enc-nom').value.trim();
+  if(!ap)return;
+  modalEncTemp.push({jer,ap,nom});
+  document.getElementById('new-enc-jer').value='';
+  document.getElementById('new-enc-ap').value='';
+  document.getElementById('new-enc-nom').value='';
+  renderModalEncargados();
+}
+function guardarEncargados(){
+  savePersonalEncargados(modalEncTemp);
+  cerrarModal('modal-encargados');
+  loadGeneral();
+}
+
+// SECCIONES
+function showSection(s){
+  document.querySelectorAll('[id^="section-"]').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(s==='general'){
+    document.getElementById('section-general').style.display='block';
+    document.getElementById('nav-main').classList.add('active');
+    loadGeneral();
+  }else if(s==='main'){
+    document.getElementById('section-main').style.display='block';
+    document.getElementById('nav-main').classList.add('active');
+  }else if(s==='informe'){
+    document.getElementById('section-informe').style.display='block';
+    document.getElementById('nav-informe').classList.add('active');
+    renderInforme();
+  }
+}
+
+// HISTORIAL
+function guardarHistorial(){
+  let hist=lsGet('bnu_historial')||[];
+  const snap={fecha:HOY_KEY,fechaLabel:HOY,divisiones:{},encargados:getEstadosEncargados()};
+  DIVISIONES.forEach(div=>{snap.divisiones[div]=getEstados(div);});
+  hist=hist.filter(h=>h.fecha!==HOY_KEY);
+  hist.unshift(snap);
+  if(hist.length>90)hist=hist.slice(0,90);
+  lsSet('bnu_historial',hist);
+}
+
+function renderInforme(){
+  const hist=lsGet('bnu_historial')||[];
+  const cont=document.getElementById('informe-list');
+  if(!hist.length){cont.innerHTML='<div style="color:var(--muted);font-family:var(--font-mono);font-size:0.8rem;padding:2rem 0;">Sin registros históricos.</div>';return;}
+  cont.innerHTML=hist.map(h=>{
+    const encP=getPersonalEncargados();
+    const encEst=h.encargados||{};
+    let tFE=encP.length;
+    let tPR=Object.values(encEst).filter(e=>e==='presente').length;
+    let tAU=tFE-tPR;
+    DIVISIONES.forEach(div=>{
+      const est=h.divisiones[div]||{};
+      const fe=getPersonal(div).length;
+      const pr=Object.values(est).filter(e=>e==='presente').length;
+      tFE+=fe;tPR+=pr;tAU+=(fe-pr);
+    });
+    return `<div class="informe-item">
+      <div class="informe-fecha">${h.fechaLabel}</div>
+      <div class="informe-stats">
+        <span style="color:var(--accent)">FE: ${tFE}</span>
+        <span style="color:var(--green-text)">PRESENTES: ${tPR}</span>
+        <span style="color:var(--red-text)">AUSENTES: ${tAU}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function limpiarHistorial(){
+  if(confirm('¿Confirmar limpieza del historial?')){lsSet('bnu_historial',[]);renderInforme();}
+}
+
+// INIT
+document.getElementById('header-date').textContent=HOY;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){cerrarModal('modal-personal');cerrarModal('modal-estados');cerrarModal('modal-encargados');}
+});
+</script>
+</body>
+</html>
